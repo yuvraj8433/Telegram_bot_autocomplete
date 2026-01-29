@@ -3,15 +3,21 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 import torch 
 import os
+import re
 
 # 🔹 Load model once (important)
 generator = pipeline(
     "text-generation",
-    model="gpt2",
-    device_map="auto"
+    model="distilgpt2",
+    device=-1   # 👈 FORCE CPU
 )
 
-def autocomplete_sentences(prompt, max_new_tokens=50, num_options=3, temperature=0.7):
+def autocomplete_sentences(
+    prompt,
+    max_new_tokens=100,   # thoda zyada
+    num_options=1,
+    temperature=0.7
+):
     results = generator(
         prompt,
         max_new_tokens=max_new_tokens,
@@ -21,10 +27,19 @@ def autocomplete_sentences(prompt, max_new_tokens=50, num_options=3, temperature
         top_k=20,
         pad_token_id=generator.tokenizer.eos_token_id
     )
-    completions = [
-        r["generated_text"].replace(prompt, "").strip()
-        for r in results
-    ]
+
+    completions = []
+
+    for r in results:
+        text = r["generated_text"].replace(prompt, "").strip()
+
+        # ✅ last complete sentence tak cut
+        sentences = re.findall(r'.*?[.!?]', text)
+        if sentences:
+            text = sentences[-1] if len(sentences) == 1 else " ".join(sentences)
+
+        completions.append(text.strip())
+
     return completions
 
 # 🔹 Start command
