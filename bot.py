@@ -15,7 +15,7 @@ generator = pipeline(
 
 def autocomplete_sentences(
     prompt,
-    max_new_tokens=100,   # thoda zyada
+    max_new_tokens=40,   # thoda zyada
     num_options=1,
     temperature=0.7
 ):
