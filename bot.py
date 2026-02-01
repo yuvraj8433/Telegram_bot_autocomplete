@@ -10,6 +10,7 @@ generator = pipeline(
     "text-generation",
     model="distilgpt2",
     device=-1   # 👈 FORCE CPU
+    model_kwargs={"torch_dtype": torch.float32}
 )
 
 def autocomplete_sentences(
